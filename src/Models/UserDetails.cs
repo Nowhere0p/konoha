@@ -1,40 +1,36 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Konoha.Models;
 
-public class UserDetails : User 
-
+public class UserDetails : User
 {
-    [JsonPropertyName("id")]
+    [BsonElement("_id")]
     public string Id { get; set; }
-    [JsonPropertyName("publicUsername")]
+
+    [BsonElement("publicUsername")]
     public string? PublicUsername { get; set; }
-    [JsonPropertyName("rollNumber")]
+
+    [BsonElement("userId")]
+    public string? UserId { get; set; }
+
+    [BsonElement("rollNumber")]
     public string? RollNumber { get; set; }
-    [JsonPropertyName("role")]
-    public Role Role { get; set; } = Role.User;
-    
-    [JsonPropertyName("gender")]
+
+    [BsonElement("role")]
+    public Role Role { get; set; } = Role.USER;
+
+    [BsonElement("gender")]
     public Gender? Gender { get; set; }
-
-    // [JsonPropertyName("dateOfBirth")]
-    // public DateOnly? DateOfBirth { get; set; }
-
-    // [JsonPropertyName("phoneNumber")]
-    // public string PhoneNumber { get; set; } = null!;
-
-    // [JsonPropertyName("address")]
-    // public string Address { get; set; } = null!;
-    
 
     public UserDetails()
     {
         Id = Guid.NewGuid().ToString();
         base.PartitionKey = DateTime.UtcNow.ToString("MM-yyyy");
     }
-    
+
     public string ToStringInsecure(bool serializeCredentials = false)
     {
         string text = JsonSerializer.Serialize(this);
@@ -46,18 +42,18 @@ public class UserDetails : User
         return text;
     }
 }
+
 public enum Role
-    {
-        User,
-        Admin,
-        SuperAdmin,
-    }
-  public enum Gender
-    {
-        Male,
-        Female,
-        NonBinary,
-        PreferNotToSay,
-        Other
-    }
- 
+{
+    USER,
+    ADMIN,
+}
+
+public enum Gender
+{
+    Male,
+    Female,
+    NonBinary,
+    PreferNotToSay,
+    Other,
+}

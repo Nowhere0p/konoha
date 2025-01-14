@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Konoha")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e2353ee282005d39f280f07fd514d84b8baba79e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b866b83553963662795ad42c2f843e91a8ee0020")]
 [assembly: System.Reflection.AssemblyProductAttribute("Konoha")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Konoha")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

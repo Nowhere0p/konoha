@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\konoha\\konoha\\Konoha.csproj": {}
+    "D:\\konoha\\Konoha\\Konoha.csproj": {}
   },
   "projects": {
-    "D:\\konoha\\konoha\\Konoha.csproj": {
+    "D:\\konoha\\Konoha\\Konoha.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\konoha\\konoha\\Konoha.csproj",
+        "projectUniqueName": "D:\\konoha\\Konoha\\Konoha.csproj",
         "projectName": "Konoha",
-        "projectPath": "D:\\konoha\\konoha\\Konoha.csproj",
+        "projectPath": "D:\\konoha\\Konoha\\Konoha.csproj",
         "packagesPath": "C:\\Users\\rajat\\.nuget\\packages\\",
-        "outputPath": "D:\\konoha\\konoha\\obj\\",
+        "outputPath": "D:\\konoha\\Konoha\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\rajat\\AppData\\Roaming\\NuGet\\NuGet.Config"

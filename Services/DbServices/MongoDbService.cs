@@ -1,8 +1,9 @@
-using MongoDB.Driver;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 
-public class MongoDbRecord<T> : IMongoDbService<T> where T : IMongoDbRecord
+public class MongoDbRecord<T> : IMongoDbService<T>
+    where T : IMongoDbRecord
 {
     private readonly IMongoDatabase _database;
 
@@ -31,7 +32,10 @@ public class MongoDbRecord<T> : IMongoDbService<T> where T : IMongoDbRecord
         try
         {
             var collection = _database.GetCollection<T>(typeof(T).Name.ToLower());
-            var filter = Builders<T>.Filter.Eq("_id", this.GetType().GetProperty("Id")?.GetValue(this));
+            var filter = Builders<T>.Filter.Eq(
+                "_id",
+                this.GetType().GetProperty("Id")?.GetValue(this)
+            );
             var document = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(this));
             var result = await collection.ReplaceOneAsync(filter, document);
             return result.ModifiedCount > 0;
@@ -47,7 +51,10 @@ public class MongoDbRecord<T> : IMongoDbService<T> where T : IMongoDbRecord
         try
         {
             var collection = _database.GetCollection<T>(typeof(T).Name.ToLower());
-            var filter = Builders<T>.Filter.Eq("_id", this.GetType().GetProperty("Id")?.GetValue(this));
+            var filter = Builders<T>.Filter.Eq(
+                "_id",
+                this.GetType().GetProperty("Id")?.GetValue(this)
+            );
             var result = await collection.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
@@ -62,7 +69,10 @@ public class MongoDbRecord<T> : IMongoDbService<T> where T : IMongoDbRecord
         try
         {
             var collection = _database.GetCollection<T>(typeof(T).Name.ToLower());
-            var filter = Builders<T>.Filter.Eq("_id", this.GetType().GetProperty("Id")?.GetValue(this));
+            var filter = Builders<T>.Filter.Eq(
+                "_id",
+                this.GetType().GetProperty("Id")?.GetValue(this)
+            );
             return await collection.Find(filter).FirstOrDefaultAsync();
         }
         catch

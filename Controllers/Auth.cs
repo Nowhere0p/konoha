@@ -1,6 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Konoha.common;
 using Konoha.Models;
 using Konoha.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Konoha.Controllers
 {
@@ -26,13 +30,22 @@ namespace Konoha.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterInteraction request)
+        public async Task<ActionResult<AuthResponse>> Register(
+            [FromBody] RegisterInteraction request
+        )
         {
             var result = await _authService.Register(request);
             if (!result)
                 return BadRequest(new { message = "Registration failed" });
 
             return Ok(result);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
+        [HttpGet("welcome")]
+        public async Task<ActionResult> Hello()
+        {
+            return Ok($"WELOME TO KONOHA\n{User.FindFirstValue(CustomClaimTypes.UserId)}");
         }
     }
 }

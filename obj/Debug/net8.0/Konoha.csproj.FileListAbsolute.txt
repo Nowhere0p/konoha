@@ -45,3 +45,4 @@ D:\konoha\konoha\bin\Debug\net8.0\SharpCompress.dll
 D:\konoha\konoha\bin\Debug\net8.0\Snappier.dll
 D:\konoha\konoha\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 D:\konoha\konoha\bin\Debug\net8.0\ZstdSharp.dll
+D:\konoha\Konoha\obj\Debug\net8.0\Konoha.sourcelink.json

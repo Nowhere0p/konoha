@@ -11,8 +11,9 @@ namespace Konoha.Models
         public string Password { get; set; } = string.Empty;
     }
 }
- public class AuthResponse
-    {
-        [JsonPropertyName("token")]
-        public string Token { get; set; } = string.Empty;
-    }
+
+public class AuthResponse
+{
+    [JsonPropertyName("token")]
+    public string Token { get; set; } = string.Empty;
+}

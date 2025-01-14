@@ -1,9 +1,11 @@
-using MongoDB.Driver;
-using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
+using DnsClient.Protocol;
+using Konoha.common;
 using Konoha.Models;
+using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 
 namespace Konoha.Services
 {
@@ -41,9 +43,11 @@ namespace Konoha.Services
                 Email = registerData.Email,
                 Password = HashPassword(registerData.Password ?? ""),
                 CreatedAt = DateTime.UtcNow,
-                Gender = registerData.Gender
+                Gender = registerData.Gender,
+                UserId = Guid.NewGuid().ToString(),
+                Role = Role.USER,
             };
-            
+
             await _usersDb.InsertOneAsync(userDetails);
             return true;
         }
@@ -55,31 +59,33 @@ namespace Konoha.Services
 
         private bool VerifyPassword(string inputPassword, string storedPassword)
         {
-          
             return HashPassword(inputPassword) == storedPassword;
         }
 
         private string GenerateJwtToken(UserDetails user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "your-default-key-here"));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), "User cannot be null");
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-            var claims = new[]
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim("UserId", user.Id),
-                new Claim("Name", user.FirstName+" "+user.LastName ?? ""),
-                new Claim("Role", user.Role.ToString()),
-                new Claim("CreateTime", user.CreatedAt.ToString())
+                Subject = new ClaimsIdentity(
+                    [
+                        new Claim(CustomClaimTypes.UserId, user.UserId),
+                        new Claim(ClaimTypes.GivenName, user.FirstName),
+                        new Claim(ClaimTypes.Surname, user.LastName),
+                        new Claim(ClaimTypes.Role, Role.USER.ToString()),
+                    ]
+                ),
+                Expires = DateTime.UtcNow.AddHours(48),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
             };
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: credentials
-            );
-
+            var token = tokenHandler.CreateToken(tokenDescriptor);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

@@ -1,29 +1,29 @@
-using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Konoha.Models;
-public class User: IMongoDbRecord
-{
 
-    [JsonPropertyName("userName")]
+public class User : IMongoDbRecord
+{
+    [BsonElement("userName")]
     public string? UserName { get; set; }
 
-    [JsonPropertyName("firstName")]
+    [BsonElement("firstName")]
     public string? FirstName { get; set; }
 
-    [JsonPropertyName("lastName")] 
+    [BsonElement("lastName")]
     public string? LastName { get; set; }
 
-    [JsonPropertyName("email")]
+    [BsonElement("email")]
     public string? Email { get; set; }
 
-    [JsonPropertyName("password")]
+    [BsonElement("password")]
     public string? Password { get; set; }
 
-    [JsonPropertyName("createdAt")]
+    [BsonElement("createdAt")]
     public DateTime? CreatedAt { get; set; }
 
-
-    [JsonPropertyName("partitionKey")]
+    [BsonElement("partitionKey")]
     public string PartitionKey { get; set; }
 
     public object GetPartitionKey()
@@ -33,9 +33,8 @@ public class User: IMongoDbRecord
 
     public User GetRedactedUser()
     {
-        // Redact password for security 
+        // Redact password for security
         Password = "[RedactedPassword]";
         return this;
     }
 }
-
