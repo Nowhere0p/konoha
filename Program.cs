@@ -1,6 +1,7 @@
 using System.Text;
 using Konoha.DbCore;
 using Konoha.Services;
+using Konoha.Services.UserServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -62,6 +63,7 @@ mongoSettings.RetryReads = true;
 // Register MongoDB services
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings));
 
+
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
@@ -70,6 +72,11 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     );
 });
 
+
+//Dependency Injections
+builder.Services.AddSingleton<IUserClient, UserClient>();
+
+// Build the app
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

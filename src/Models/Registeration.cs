@@ -3,12 +3,6 @@ using Konoha.Models;
 
 public class RegisterInteraction
 {
-    [JsonPropertyName("userName")]
-    public string UserName { get; set; } = string.Empty;
-
-    [JsonPropertyName("publicUsername")]
-    public string PublicUsername { get; set; } = string.Empty;
-
     [JsonPropertyName("firstName")]
     public string FirstName { get; set; } = string.Empty;
 

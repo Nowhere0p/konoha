@@ -15,10 +15,7 @@ public class UserDetails : User
 
     [BsonElement("userId")]
     public string? UserId { get; set; }
-
-    [BsonElement("rollNumber")]
-    public string? RollNumber { get; set; }
-
+    
     [BsonElement("role")]
     public Role Role { get; set; } = Role.USER;
 
@@ -31,16 +28,7 @@ public class UserDetails : User
         base.PartitionKey = DateTime.UtcNow.ToString("MM-yyyy");
     }
 
-    public string ToStringInsecure(bool serializeCredentials = false)
-    {
-        string text = JsonSerializer.Serialize(this);
-        if (!serializeCredentials && base.Password != null)
-        {
-            return text.Replace(base.Password, "_REDACTED_");
-        }
-
-        return text;
-    }
+  
 }
 
 public enum Role
