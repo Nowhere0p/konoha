@@ -15,7 +15,7 @@ public class UserDetails : User
 
     [BsonElement("userId")]
     public string? UserId { get; set; }
-    
+
     [BsonElement("role")]
     public Role Role { get; set; } = Role.USER;
 
@@ -27,8 +27,6 @@ public class UserDetails : User
         Id = Guid.NewGuid().ToString();
         base.PartitionKey = DateTime.UtcNow.ToString("MM-yyyy");
     }
-
-  
 }
 
 public enum Role

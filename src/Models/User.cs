@@ -5,7 +5,6 @@ namespace Konoha.Models;
 
 public class User : IMongoDbRecord
 {
-  
     [BsonElement("firstName")]
     public string? FirstName { get; set; }
 

@@ -1,7 +1,8 @@
 using System.Text;
 using Konoha.DbCore;
+// using Konoha.Middleware;
+using Konoha.Models;
 using Konoha.Services;
-using Konoha.Services.UserServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -14,9 +15,6 @@ builder.Services.AddSwaggerGen();
 
 //Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-// Remove generic registration since it needs to be registered per concrete type
-// builder.Services.AddScoped<IMongoDbRecord, MongoDbRecord>();
 
 // JWT Authentication
 builder
@@ -52,32 +50,19 @@ builder.Services.AddCors(options =>
 // Add controllers before other middleware configurations
 builder.Services.AddControllers();
 
-// MongoDB configuration
-var mongoSettings = MongoClientSettings.FromConnectionString(
-    builder.Configuration.GetSection("MongoDb").Get<MongoDbSettings>()?.ConnectionString
+var userDbService = await InitializeMongoClientAsync<UserDetails>(
+    builder.Configuration.GetSection("UserDetailsDb")
 );
-mongoSettings.ServerApi = new ServerApi(ServerApiVersion.V1);
-mongoSettings.RetryWrites = true;
-mongoSettings.RetryReads = true;
-
-// Register MongoDB services
-builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings));
-
-
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
-{
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(
-        builder.Configuration.GetSection("MongoDb").Get<MongoDbSettings>()?.DatabaseName
-    );
-});
-
+builder.Services.AddSingleton<IMongoDbService<UserDetails>>(userDbService);
 
 //Dependency Injections
 builder.Services.AddSingleton<IUserClient, UserClient>();
 
 // Build the app
 var app = builder.Build();
+
+// Use the error handling middleware
+// app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline
 app.MapControllers();
@@ -97,3 +82,20 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Run();
+
+async Task<MongoDbService<T>> InitializeMongoClientAsync<T>(
+    IConfigurationSection configurationSection
+)
+    where T : IMongoDbRecord
+{
+    var mongoSettings = MongoClientSettings.FromConnectionString(
+        configurationSection.GetSection("ConnectionString").Value
+    );
+    mongoSettings.ServerApi = new ServerApi(ServerApiVersion.V1);
+    mongoSettings.RetryWrites = true;
+    mongoSettings.RetryReads = true;
+    var databaseName = configurationSection.GetSection("DatabaseName").Value;
+    var collectionName = configurationSection.GetSection("CollectionName").Value;
+    var client = new MongoClient(mongoSettings);
+    return new MongoDbService<T>(client, databaseName, collectionName);
+}
