@@ -20,6 +20,9 @@ public class User : IMongoDbRecord
     [BsonElement("createdAt")]
     public DateTime? CreatedAt { get; set; }
 
+    [BsonElement("isVerified")]
+    public bool IsVerified{get;set;}=false;
+
     [BsonElement("partitionKey")]
     public string PartitionKey { get; set; }
 
