@@ -19,6 +19,7 @@ namespace Konoha.Controllers;
             try{
              _logger.LogInformation($"Verifying OTP for {request.Email}");
             await _otpVerificationService.VerifyOtpAsync(request.Code, request.Email);
+            _logger.LogInformation($"User Verified Successfully : {request.Email}");
             return Ok("User Verified Successfully");
             }
             catch(KonohaException){

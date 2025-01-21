@@ -24,7 +24,7 @@ public class OtpVerificationService(
 
     public async Task SendOtpAsync(string email)
     {
-        var code = GenerateOtpCode();
+        var code = await GenerateOtpCode();
         var otp = new OtpVerification { Email = email, verificationCode = code.ToString() };
         await _otpDb.SaveAsync(otp);
         var mail = new EmailModel
@@ -44,7 +44,7 @@ public async Task VerifyOtpAsync(string code, string email)
         var otpRecord = await ValidateOtpAsync(code, email);
 
         // Fetch user
-        var user = (await _usersDb.GetItemsAsync(x => x.Email == email && !x.IsVerified)).FirstOrDefault();
+        var user = (await _usersDb.GetItemsAsync(x => x.Email == email && x.IsVerified==false)).FirstOrDefault();
         if (user == null)
             throw new KonohaException(KonohaException.BadRequest, "User Not Found");
 
@@ -67,7 +67,8 @@ private async Task<OtpVerification> ValidateOtpAsync(string code, string email)
     var otp = (await _otpDb.GetItemsAsync(x => x.Email == email && x.verificationCode == code)).FirstOrDefault();
     if (otp == null)
         throw new KonohaException(KonohaException.BadRequest, "Invalid OTP");
-
+    if(!otp.IsValid)
+        throw new KonohaException(KonohaException.BadRequest, "OTP Already Used");
     if (otp.ExpiresAt < DateTime.UtcNow)
     {
         otp.IsValid = false;
@@ -90,7 +91,7 @@ private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Creat
 
 private async Task<int> GenerateOtpCode()
 {
-    byte[] buffer = new byte[4];
+    byte[] buffer = new byte[6];
     _rng.GetBytes(buffer);
     int code = BitConverter.ToInt32(buffer, 0) % 900000 + 100000;
     return Math.Abs(code);
