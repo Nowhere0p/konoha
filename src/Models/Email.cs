@@ -1,4 +1,5 @@
 namespace Konoha.Models;
+
 public class EmailModel
 {
     public List<string> ToEmails { get; set; } // List of recipients

@@ -17,12 +17,6 @@ public class User : IMongoDbRecord
     [BsonElement("password")]
     public string? Password { get; set; }
 
-    [BsonElement("createdAt")]
-    public DateTime? CreatedAt { get; set; }
-
-    [BsonElement("isVerified")]
-    public bool IsVerified{get;set;}=false;
-
     [BsonElement("partitionKey")]
     public string PartitionKey { get; set; }
 

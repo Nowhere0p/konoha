@@ -14,13 +14,15 @@ namespace Konoha.Controllers
 {
     [ApiController]
     [Route("api/v1.0")]
-    public class AuthController(IAuthService authService,IEmailService emailService,ILogger<AuthController> logger) : ControllerBase
+    public class AuthController(
+        IAuthService authService,
+        IEmailService emailService,
+        ILogger<AuthController> logger
+    ) : ControllerBase
     {
-        private readonly IAuthService _authService=authService;
-        private readonly IEmailService _emailService=emailService;
-        private readonly ILogger<AuthController> _logger=logger;
-
-        
+        private readonly IAuthService _authService = authService;
+        private readonly IEmailService _emailService = emailService;
+        private readonly ILogger<AuthController> _logger = logger;
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] Login request)
@@ -34,17 +36,24 @@ namespace Konoha.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterInteraction request)
-        {   
-            try{
-            await _authService.Register(request);
-            return Ok();
-            }catch(KonohaException ){
-                throw;
-            }catch(Exception er){
-                _logger.LogError("Failed to Register");
-                throw new KonohaException(KonohaException.InternalServerError,"Internal Server Error");
+        {
+            try
+            {
+                await _authService.Register(request);
+                return Ok();
             }
-            
+            catch (KonohaException)
+            {
+                throw;
+            }
+            catch (Exception er)
+            {
+                _logger.LogError("Failed to Register");
+                throw new KonohaException(
+                    KonohaException.InternalServerError,
+                    "Internal Server Error"
+                );
+            }
         }
 
         [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
