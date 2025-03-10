@@ -2,12 +2,12 @@ using System.Net;
 using System.Text;
 using Konoha.DbCore;
 using Konoha.Middleware;
-
 // using Konoha.Middleware;
 using Konoha.Models;
 using Konoha.Services;
 using Konoha.Services.EmailHelper;
 using Konoha.Services.OtpVerificationService;
+using Konoha.Services.Products;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -89,6 +89,7 @@ builder.Services.AddSingleton<IMongoDbService<OtpVerification>>(otpDbService);
 builder.Services.AddSingleton<IUserClient, UserClient>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<IOtpVerificationService, OtpVerificationService>();
+builder.Services.AddSingleton<IProductClient, ProductsClient>();
 builder.Services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
 // Build the app

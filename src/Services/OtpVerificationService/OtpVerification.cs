@@ -36,65 +36,68 @@ public class OtpVerificationService(
         await _emailService.SendEmailAsync(mail);
     }
 
-public async Task VerifyOtpAsync(string code, string email)
-{
-    try
+    public async Task VerifyOtpAsync(string code, string email)
     {
-        // Validate OTP
-        var otpRecord = await ValidateOtpAsync(code, email);
+        try
+        {
+            // Validate OTP
+            var otpRecord = await ValidateOtpAsync(code, email);
 
-        // Fetch user
-        var user = (await _usersDb.GetItemsAsync(x => x.Email == email && x.IsVerified==false)).FirstOrDefault();
-        if (user == null)
-            throw new KonohaException(KonohaException.BadRequest, "User Not Found");
+            // Fetch user
+            var user = (
+                await _usersDb.GetItemsAsync(x => x.Email == email && x.IsVerified == false)
+            ).FirstOrDefault();
+            if (user == null)
+                throw new KonohaException(KonohaException.BadRequest, "User Not Found");
 
-        await UpdateRecordsAsync(otpRecord, user);
+            await UpdateRecordsAsync(otpRecord, user);
+        }
+        catch (KonohaException ex)
+        {
+            _logger.LogError(ex, $"Error during OTP verification for email: {email}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "error during OTP verification for email: {Email}", email);
+            throw new KonohaException(KonohaException.InternalServerError, $"Error: {ex.Message}");
+        }
     }
-    catch (KonohaException ex)
+
+    private async Task<OtpVerification> ValidateOtpAsync(string code, string email)
     {
-        _logger.LogError(ex, $"Error during OTP verification for email: {email}");
-        throw;
+        var otp = (
+            await _otpDb.GetItemsAsync(x => x.Email == email && x.verificationCode == code)
+        ).FirstOrDefault();
+        if (otp == null)
+            throw new KonohaException(KonohaException.BadRequest, "Invalid OTP");
+        if (!otp.IsValid)
+            throw new KonohaException(KonohaException.BadRequest, "OTP Already Used");
+        if (otp.ExpiresAt < DateTime.UtcNow)
+        {
+            otp.IsValid = false;
+            await _otpDb.UpdateAsync(otp.Id, otp);
+            throw new KonohaException(KonohaException.BadRequest, "OTP Expired");
+        }
+        return otp;
     }
-    catch (Exception ex)
+
+    private async Task UpdateRecordsAsync(OtpVerification otpRecord, UserDetails user)
     {
-        _logger.LogError(ex, "error during OTP verification for email: {Email}", email);
-        throw new KonohaException(KonohaException.InternalServerError, $"Error: {ex.Message}");
-    }
-}
+        otpRecord.IsValid = false;
+        user.IsVerified = true;
 
-private async Task<OtpVerification> ValidateOtpAsync(string code, string email)
-{
-    var otp = (await _otpDb.GetItemsAsync(x => x.Email == email && x.verificationCode == code)).FirstOrDefault();
-    if (otp == null)
-        throw new KonohaException(KonohaException.BadRequest, "Invalid OTP");
-    if(!otp.IsValid)
-        throw new KonohaException(KonohaException.BadRequest, "OTP Already Used");
-    if (otp.ExpiresAt < DateTime.UtcNow)
+        await _otpDb.UpdateAsync(otpRecord.Id, otpRecord);
+        await _usersDb.UpdateAsync(user.Id, user);
+    }
+
+    private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
+
+    private async Task<int> GenerateOtpCode()
     {
-        otp.IsValid = false;
-        await _otpDb.UpdateAsync(otp.Id, otp);
-        throw new KonohaException(KonohaException.BadRequest, "OTP Expired");
+        byte[] buffer = new byte[6];
+        _rng.GetBytes(buffer);
+        int code = BitConverter.ToInt32(buffer, 0) % 900000 + 100000;
+        return Math.Abs(code);
     }
-    return otp;
-}
-
-private async Task UpdateRecordsAsync(OtpVerification otpRecord, UserDetails user)
-{
-    otpRecord.IsValid = false;
-    user.IsVerified = true;
-
-    await _otpDb.UpdateAsync(otpRecord.Id, otpRecord);
-    await _usersDb.UpdateAsync(user.Id, user);
-}
-
-private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
-
-private async Task<int> GenerateOtpCode()
-{
-    byte[] buffer = new byte[6];
-    _rng.GetBytes(buffer);
-    int code = BitConverter.ToInt32(buffer, 0) % 900000 + 100000;
-    return Math.Abs(code);
-}
-
 }
