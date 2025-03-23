@@ -17,9 +17,6 @@ public class User : IMongoDbRecord
     [BsonElement("password")]
     public string? Password { get; set; }
 
-    [BsonElement("createdAt")]
-    public DateTime? CreatedAt { get; set; }
-
     [BsonElement("partitionKey")]
     public string PartitionKey { get; set; }
 

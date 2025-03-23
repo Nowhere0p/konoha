@@ -35,9 +35,10 @@ namespace Konoha.Extensions
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
         }
 
-        public static void RedactPassword(this UserDetails userDetails)
+        public static UserDetails RedactPassword(this UserDetails userDetails)
         {
             userDetails.Password = "REDACTED";
+            return userDetails;
         }
     }
 }

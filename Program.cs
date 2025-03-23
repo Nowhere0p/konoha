@@ -1,10 +1,17 @@
+using System.Net;
 using System.Text;
 using Konoha.DbCore;
+using Konoha.Middleware;
 // using Konoha.Middleware;
 using Konoha.Models;
 using Konoha.Services;
+using Konoha.Services.EmailHelper;
+using Konoha.Services.OtpVerificationService;
+using Konoha.Services.Products;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +22,24 @@ builder.Services.AddSwaggerGen();
 
 //Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Email Service
+var emailConfigs = builder.Configuration.GetSection("EmailSettings");
+builder.Services.AddSingleton<ISmtpClient>(provider =>
+{
+    var smtpClient = new SmtpClient();
+    smtpClient.Connect(
+        emailConfigs.GetSection("Host").Value,
+        int.Parse(emailConfigs.GetSection("Port").Value),
+        MailKit.Security.SecureSocketOptions.StartTls // Use appropriate security options
+    );
+    smtpClient.Authenticate(
+        emailConfigs.GetSection("Username").Value,
+        emailConfigs.GetSection("Password").Value
+    );
+
+    return smtpClient;
+});
 
 // JWT Authentication
 builder
@@ -55,14 +80,23 @@ var userDbService = await InitializeMongoClientAsync<UserDetails>(
 );
 builder.Services.AddSingleton<IMongoDbService<UserDetails>>(userDbService);
 
+var otpDbService = await InitializeMongoClientAsync<OtpVerification>(
+    builder.Configuration.GetSection("OtpVerificationDb")
+);
+builder.Services.AddSingleton<IMongoDbService<OtpVerification>>(otpDbService);
+
 //Dependency Injections
 builder.Services.AddSingleton<IUserClient, UserClient>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddSingleton<IOtpVerificationService, OtpVerificationService>();
+builder.Services.AddSingleton<IProductClient, ProductsClient>();
+builder.Services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
 // Build the app
 var app = builder.Build();
 
 // Use the error handling middleware
-// app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline
 app.MapControllers();

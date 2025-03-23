@@ -1,5 +1,6 @@
 using Konoha.common;
 using Konoha.Common;
+using Konoha.Extensions;
 using Konoha.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ public class UserDetailsController(IUserClient userClient) : ControllerBase
             {
                 throw new KonohaException(KonohaException.InternalServerError, "Internal Error");
             }
-            var user = await _userClient.GetUserByIdAsync(userId);
+            var user = (await _userClient.GetUserByIdAsync(userId)).RedactPassword();
             return Ok(user);
         }
         catch (KonohaException ex)

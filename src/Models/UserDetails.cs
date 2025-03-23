@@ -16,6 +16,12 @@ public class UserDetails : User
     [BsonElement("userId")]
     public string? UserId { get; set; }
 
+    [BsonElement("createdAt")]
+    public DateTime? CreatedAt { get; set; }
+
+    [BsonElement("isVerified")]
+    public bool IsVerified { get; set; } = false;
+
     [BsonElement("role")]
     public Role Role { get; set; } = Role.USER;
 
