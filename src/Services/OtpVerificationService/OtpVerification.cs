@@ -25,7 +25,7 @@ public class OtpVerificationService(
     public async Task SendOtpAsync(string email)
     {
         var code = await GenerateOtpCode();
-        var otp = new OtpVerification { Email = email, verificationCode = code.ToString() };
+        var otp = new OtpVerification { Email = email, verificationCode = code.ToString(),IsValid= true, ExpiresAt = DateTime.UtcNow.AddMinutes(5) };
         await _otpDb.SaveAsync(otp);
         var mail = new EmailModel
         {
@@ -91,13 +91,14 @@ public class OtpVerificationService(
         await _usersDb.UpdateAsync(user.Id, user);
     }
 
-    private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
+        private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
 
-    private async Task<int> GenerateOtpCode()
-    {
-        byte[] buffer = new byte[6];
-        _rng.GetBytes(buffer);
-        int code = BitConverter.ToInt32(buffer, 0) % 900000 + 100000;
-        return Math.Abs(code);
-    }
+        private async Task<int> GenerateOtpCode()
+        {
+            byte[] buffer = new byte[4];
+            _rng.GetBytes(buffer);
+            // Generate number between 100000 and 999999
+            int code = (Math.Abs(BitConverter.ToInt32(buffer, 0)) % 900000) + 100000;
+            return code;
+        }
 }

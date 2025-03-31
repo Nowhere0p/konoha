@@ -25,7 +25,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Email Service
 var emailConfigs = builder.Configuration.GetSection("EmailSettings");
-builder.Services.AddSingleton<ISmtpClient>(provider =>
+builder.Services.AddTransient<ISmtpClient>(provider =>
 {
     var smtpClient = new SmtpClient();
     smtpClient.Connect(

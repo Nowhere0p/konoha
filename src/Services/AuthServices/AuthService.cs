@@ -53,16 +53,18 @@ public class AuthService(
     {
         try
         {
-            if (
-                (
-                    await _usersDb.GetItemsAsync(x =>
-                        x.Email == registerData.Email && x.IsVerified == true
-                    )
-                ).Any()
-            )
+            var existingUser = (await _usersDb.GetItemsAsync(x => x.Email == registerData.Email)).FirstOrDefault();
+            
+            if (existingUser != null)
+            {
+            if (existingUser.IsVerified)
+            {
                 throw new KonohaException(KonohaException.Forbidden, "Email already Exists");
-            var userDetails = registerData.ToUserDetails();
+            }
+            await _usersDb.DeleteAsync(existingUser.Id);
+            }
 
+            var userDetails = registerData.ToUserDetails();
             await _usersDb.SaveAsync(userDetails);
             await _verificationService.SendOtpAsync(userDetails.Email);
         }

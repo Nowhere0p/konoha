@@ -17,3 +17,8 @@ public class AuthResponse
     [JsonPropertyName("token")]
     public string Token { get; set; } = string.Empty;
 }
+public class LogoutResponse
+{
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = string.Empty;
+}
