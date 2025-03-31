@@ -27,6 +27,9 @@ public class UserDetails : User
 
     [BsonElement("gender")]
     public Gender? Gender { get; set; }
+    
+    [BsonElement("favourites")]
+    public List<FavouriteProductInteraction> Favourites {get; set;}=[];
 
     public UserDetails()
     {

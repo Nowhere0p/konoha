@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using Konoha.Common;
+using Konoha.Models;
 using RestSharp;
 
 namespace Konoha.Services.Products;
@@ -8,10 +9,35 @@ namespace Konoha.Services.Products;
 public class ProductsClient : IProductClient
 {
     private readonly ILogger<ProductsClient> _logger;
+    private readonly IUserClient _userClient;
+    private  readonly IMongoDbService<UserDetails> _mongoDbService;
 
-    public ProductsClient(ILogger<ProductsClient> logger)
+
+
+    public ProductsClient(IUserClient userClient,ILogger<ProductsClient> logger,IMongoDbService<UserDetails> mongoDbService)
     {
         _logger = logger;
+        _userClient=userClient;
+        _mongoDbService=mongoDbService;
+    }
+
+    public async Task AddFavProductAsync(List<FavouriteProductInteraction> body,string userId)
+    {   
+        try{
+                var user=await _userClient.GetUserByIdAsync(userId);
+                foreach(var data in body){
+                    user.Favourites.Add(data);
+                    }
+             
+                await _mongoDbService.UpdateAsync(user.Id,user);
+        }catch(KonohaException ex){
+            _logger.LogError(ex.Message);
+            throw;
+        }
+        catch(Exception e){
+            throw new KonohaException(KonohaException.InternalServerError,"error adding product to fav");
+        }
+        
     }
 
     public async Task<List<ProductResponse>> SearchProductsAsync(string query)

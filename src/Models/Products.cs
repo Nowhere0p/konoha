@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 
 public class AmazonProduct
 {
@@ -113,17 +114,24 @@ public class AmazonData
 public class ProductResponse
 {
     [JsonPropertyName("title")]
-    public string Title { get; set; } // Product title
+    public string Title { get; set; } 
 
     [JsonPropertyName("price")]
-    public string Price { get; set; } // Product price
+    public string Price { get; set; } 
 
     [JsonPropertyName("rating")]
-    public string Rating { get; set; } // Product rating
+    public string Rating { get; set; }
 
     [JsonPropertyName("url")]
-    public string Url { get; set; } // Product URL
+    public string Url { get; set; } 
 
     [JsonPropertyName("imageUrl")]
-    public string ImageUrl { get; set; } // Product photo URL
+    public string ImageUrl { get; set; } 
+} 
+public class FavouriteProductInteraction{
+    [BsonElement ("name")]
+    public string Name{get;set;}
+
+    [BsonElement("link")]
+    public string Link{get;set;}
 }

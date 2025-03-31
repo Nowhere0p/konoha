@@ -31,7 +31,15 @@ namespace Konoha.Controllers
             if (result == null)
                 return Unauthorized(new { message = "Invalid email or password" });
 
-            return Ok(result);
+            return Ok(new AuthResponse{Token=result});
+        }
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            
+
+            return Ok( new LogoutResponse{Message="logged out"});
         }
 
         [HttpPost("register")]
@@ -48,7 +56,7 @@ namespace Konoha.Controllers
             }
             catch (Exception er)
             {
-                _logger.LogError("Failed to Register");
+                _logger.LogError($"Failed to Register: {er.Message}");
                 throw new KonohaException(
                     KonohaException.InternalServerError,
                     "Internal Server Error"
@@ -56,20 +64,11 @@ namespace Konoha.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
+        // [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
+        [AllowAnonymous]
         [HttpGet("welcome")]
         public async Task<IActionResult> Hello()
         {
-            // var email=new EmailModel{
-            //     ToEmails=new List<string>{
-            //         "bt23cse013@nituk.ac.in",
-            //         "jzgupta.sahil04@gmail.com",
-            //         "bt23ece009@nituk.ac.in",
-            //     },
-            //     Body="TESTING",
-            //     Subject="OTP Verification",
-            // };
-            // await _emailService.SendEmailAsync(email);
             return Ok($"WELOME TO KONOHA");
         }
     }

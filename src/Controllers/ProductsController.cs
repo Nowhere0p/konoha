@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Konoha.common;
 using Konoha.Common;
 using Konoha.Services.Products;
 using Microsoft.AspNetCore.Authorization;
@@ -33,5 +34,26 @@ namespace Konoha.Controllers
                 );
             }
         }
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "USER")]
+
+         [HttpGet("favourite")]
+        public async Task<IActionResult> AddFavourite([FromBody] List<FavouriteProductInteraction> interaction )
+        {
+            try
+            {   
+                  var userId = User.FindFirst(CustomClaimTypes.UserId)?.Value;
+                    await _productService.AddFavProductAsync(interaction,userId);
+                    return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An error occurred while searching for products.", ex);
+                throw new KonohaException(
+                    KonohaException.InternalServerError,
+                    "An error occurred while searching for products."
+                );
+            }
+        }
+
     }
 }
